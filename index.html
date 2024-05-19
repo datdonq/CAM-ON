@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam Stream</title>
+    <style>
+        #video-container {
+            margin: 0 auto;
+            width: 640px;
+        }
+        #video-container video {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video autoplay playsinline></video>
+    </div>
+    <script>
+        const videoElement = document.querySelector('video');
+
+        // Fetch the webcam stream
+        async function fetchWebcamStream() {
+            const stream = await fetch('v1/camera/stream');
+            videoElement.srcObject = await stream.blob();
+        }
+
+        fetchWebcamStream();
+    </script>
+</body>
+</html>
