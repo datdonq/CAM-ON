@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from model import Base
+from src.db.model import Base
 
 engine = create_engine('sqlite:///./users.db')
 session_factory = sessionmaker(bind=engine)

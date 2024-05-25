@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+gunicorn
+sqlalchemy
+pydantic
+passlib[bcrypt]
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.5
+opencv-python
+orjson
+unidecode
+loguru

@@ -13,7 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from src.api.v1.endpoints import router as v1_router
-from src.settings.config import APPLICATION
+
 # from src.settings.event import (
 #     create_start_app_handler, create_stop_app_handler,
 # )

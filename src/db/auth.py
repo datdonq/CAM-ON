@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status,Header
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
-from database import Session
-from model import User, Camera
-from database import get_db
+from src.db.database import Session
+from src.db.model import User, Camera
+from src.db.database import get_db
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 class TokenData(BaseModel):
@@ -39,13 +39,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")
-        token_data = TokenData(username=username)
-    except JWTError:
+        # token_data = TokenData(username=username)
+    except :
         raise credentials_exception
 
-    # db = Session()
-    # user = db.query(User).filter(User.username == username).first()
+    db = Session()
+    user = db.query(User).filter(User.username == username).first()
 
-    # if user is None:
-    #     raise credentials_exception
-    return username
+    if user is None:
+        raise credentials_exception
+    return user

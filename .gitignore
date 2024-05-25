@@ -779,3 +779,6 @@ resources/chroma_flexstack_rag
 tmp/*
 fs/*
 test.py
+CamOnDB_log.ldf
+CamOnDB.mdf
+frames/*
