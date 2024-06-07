@@ -782,3 +782,5 @@ test.py
 CamOnDB_log.ldf
 CamOnDB.mdf
 frames/*
+*.mp4
+*.pt
