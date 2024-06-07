@@ -784,3 +784,4 @@ CamOnDB.mdf
 frames/*
 *.mp4
 *.pt
+*.names
