@@ -45,3 +45,37 @@ async def add_new_camera(camera_url:str=Form(...),
     """
     execute_query(insert_query)
     return {"message": "Camera added successfully"}
+
+@router.delete("/delete_camera/{camera_id}")
+async def delete_camera(camera_id: int):
+    # Truy vấn SQL để xóa một dòng từ bảng Cameras
+    delete_query = f"""
+    DELETE FROM Cameras WHERE Id = {camera_id}
+    """
+    execute_query(delete_query)
+    return {"message": "Camera deleted successfully"}
+
+@router.put("/update_camera/{camera_id}")
+async def update_camera(camera_id: int,
+                        camera_url: Optional[str] = Form(None),
+                        camera_name: Optional[str] = Form(None),
+                        user_id: Optional[str] = Form(None)):
+    # Kiểm tra và tạo câu truy vấn SQL để cập nhật các trường được cung cấp
+    update_fields = []
+    if camera_name is not None:
+        update_fields.append(f"Name = '{camera_name}'")
+    if camera_url is not None:
+        update_fields.append(f"IpAddress = '{camera_url}'")
+    if user_id is not None:
+        update_fields.append(f"AccountId = '{user_id}'")
+    
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    update_query = f"""
+    UPDATE Cameras
+    SET {', '.join(update_fields)}
+    WHERE Id = {camera_id}
+    """
+    execute_query(update_query)
+    return {"message": "Camera updated successfully"}
