@@ -66,3 +66,13 @@ async def delete_package(package_id: int):
     delete_query = f"DELETE FROM Packages WHERE Id = {package_id}"
     execute_query(delete_query)
     return {"message": "Package deleted successfully"}
+
+@router.get("/get_package/{package_id}")
+async def get_package(package_id: int):
+    select_query = f"""
+    SELECT * FROM Packages WHERE Id = {package_id}
+    """
+    package = fetch_query(select_query)
+    if not package:
+        raise HTTPException(status_code=404, detail="Package not found")
+    return package

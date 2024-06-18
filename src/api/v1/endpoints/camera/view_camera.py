@@ -79,3 +79,23 @@ async def update_camera(camera_id: int,
     """
     execute_query(update_query)
     return {"message": "Camera updated successfully"}
+
+@router.get("/get_camera/{camera_id}")
+async def get_camera(camera_id: int):
+    select_query = f"""
+    SELECT * FROM Cameras WHERE Id = {camera_id}
+    """
+    camera = fetch_query(select_query)
+    if not camera:
+        raise HTTPException(status_code=404, detail="Camera not found")
+    return camera
+
+@router.get("/get_cameras_by_user/{user_id}")
+async def get_cameras_by_user(user_id: str):
+    select_query = f"""
+    SELECT * FROM Cameras WHERE AccountId = '{user_id}'
+    """
+    cameras = fetch_query(select_query)
+    if not cameras:
+        raise HTTPException(status_code=404, detail="No cameras found for the given user ID")
+    return cameras

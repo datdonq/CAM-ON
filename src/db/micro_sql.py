@@ -26,3 +26,15 @@ def retrival_query(query: str):
     result = cursor.fetchall()
     conn.close()
     return [row for row in result] if result else []
+
+def fetch_query(query: str):
+    server = 'DESKTOP-BVGOMR7'
+    database = 'CamOnDB'
+    connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    columns = [column[0] for column in cursor.description]
+    result = cursor.fetchall()
+    conn.close()
+    return [dict(zip(columns, row)) for row in result] if result else []
