@@ -30,13 +30,6 @@ class UserInfo(BaseModel):
     LockoutEnabled: Optional[bool] = None
     AccessFailedCount: Optional[int] = None
 
-@router.get("/get_all_user_ids", response_model=List[str])
-async def get_all_user_ids():
-    query = "SELECT Id FROM AspNetUsers"
-    result = retrival_query(query)
-    user_ids = [user[0] for user in result]
-    return user_ids
-
 @router.get("/get_user_info/{user_id}", response_model=UserInfo)
 async def get_user_info(user_id: str):
     query = f"""
@@ -121,4 +114,35 @@ async def update_user(user_id: str,
     execute_query(update_query)
     return {"message": "User updated successfully"}
 
+
+@router.get("/get_all_users", response_model=List[UserInfo])
+async def get_all_users():
+    select_query = """
+            SELECT Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, 
+                PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, 
+                CONVERT(VARCHAR, LockoutEnd, 126) as LockoutEnd, 
+                LockoutEnabled, AccessFailedCount 
+            FROM AspNetUsers
+            """
+    result = fetch_query_user(select_query)
+    if not result:
+        raise HTTPException(status_code=404, detail="No users found")
     
+    users_info = []
+    for user in result:
+        users_info.append(UserInfo(
+            Id=user['Id'],
+            UserName=user['UserName'],
+            NormalizedUserName=user['NormalizedUserName'],
+            Email=user['Email'],
+            NormalizedEmail=user['NormalizedEmail'],
+            EmailConfirmed=user['EmailConfirmed'],
+            PhoneNumber=user['PhoneNumber'],
+            PhoneNumberConfirmed=user['PhoneNumberConfirmed'],
+            TwoFactorEnabled=user['TwoFactorEnabled'],
+            LockoutEnd=user['LockoutEnd'],
+            LockoutEnabled=user['LockoutEnabled'],
+            AccessFailedCount=user['AccessFailedCount']
+        ))
+    
+    return users_info

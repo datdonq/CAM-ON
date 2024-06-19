@@ -76,3 +76,11 @@ async def get_package(package_id: int):
     if not package:
         raise HTTPException(status_code=404, detail="Package not found")
     return package
+
+@router.get("/get_all_packages")
+async def get_all_packages():
+    select_query = "SELECT * FROM Packages"
+    packages = fetch_query(select_query)
+    if not packages:
+        raise HTTPException(status_code=404, detail="No packages found")
+    return packages

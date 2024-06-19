@@ -99,3 +99,11 @@ async def get_cameras_by_user(user_id: str):
     if not cameras:
         raise HTTPException(status_code=404, detail="No cameras found for the given user ID")
     return cameras
+
+@router.get("/get_all_cameras")
+async def get_all_cameras():
+    select_query = "SELECT * FROM Cameras"
+    cameras = fetch_query(select_query)
+    if not cameras:
+        raise HTTPException(status_code=404, detail="No cameras found")
+    return cameras
