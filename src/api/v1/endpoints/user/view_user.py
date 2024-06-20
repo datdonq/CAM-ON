@@ -32,22 +32,22 @@ class UserInfo(BaseModel):
 
 @router.get("/get_user_info/{user_id}", response_model=UserInfo)
 async def get_user_info(user_id: str):
-    query = f"""
+    query = """
             SELECT Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, 
                 PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, 
                 CONVERT(VARCHAR, LockoutEnd, 126) as LockoutEnd, 
                 LockoutEnabled, AccessFailedCount 
             FROM AspNetUsers 
-            WHERE Id = {user_id}
+            WHERE Id = ?
             """
-    result = retrival_query(query)
+    result = retrival_query_user(query, (user_id,))
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     
     user_info = result[0]
     
-    # Chuyển đổi kiểu dữ liệu datetimeoffset sang chuỗi
-    lockout_end = user_info[9].isoformat() if user_info[9] else None
+    # Convert datetimeoffset to string
+    lockout_end = user_info[9] if user_info[9] else None
     
     return UserInfo(
         Id=user_info[0],
