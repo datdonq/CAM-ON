@@ -32,7 +32,7 @@ async def stream_camera(camera_id:str=Query(None, description="Camera ID") ):
     if not ip_url:
         ip_url = 0
     asyncio.create_task(capture_and_save(ip_url, folder_path))
-    return StreamingResponse(capture_webcam(ip_url), media_type="multipart/x-mixed-replace; boundary=frame")
+    return StreamingResponse(capture_webcam(ip_url,True), media_type="multipart/x-mixed-replace; boundary=frame")
 
 @router.post("/add_camera")
 async def add_new_camera(camera_url:str=Form(...),
