@@ -6,7 +6,7 @@ from src.api.v1.endpoints.camera.object_tracking import *
 
 def capture_webcam(ip_camera_url, flag = False):
     if flag:
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(ip_camera_url)
         while True:
             ret, frame = cap.read()
             if not ret:
@@ -42,7 +42,7 @@ def capture_webcam(ip_camera_url, flag = False):
 
             
 async def capture_and_save(ip_camera_url, folder_path):
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(ip_camera_url)
     frame_count = 0
     while True:
         ret, frame = cap.read()
