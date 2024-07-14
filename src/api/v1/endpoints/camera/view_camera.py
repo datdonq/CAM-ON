@@ -4,7 +4,7 @@ import os
 import asyncio
 
 
-from fastapi import APIRouter, Depends, Form, UploadFile, File, BackgroundTasks,Query
+from fastapi import APIRouter, Depends, UploadFile, File, BackgroundTasks,Query, Form
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from starlette.requests import Request
 from fastapi.staticfiles import StaticFiles
@@ -24,10 +24,10 @@ security = HTTPBasic()
 # Dictionary to store active camera tasks
 camera_tasks: Dict[str, asyncio.Task] = {}
 
-@router.post("/start_cameras_for_user")
-async def start_cameras_for_user(user_id: str = Form(...)):
+@router.post("/start_cameras_for_all_user")
+async def start_cameras_for_user():
     select_query = f"""
-    SELECT Id, IpAddress FROM Cameras WHERE AccountId = '{user_id}'
+    SELECT Id, IpAddress FROM Cameras
     """
     cameras = fetch_query(select_query)
     if not cameras:
@@ -39,10 +39,11 @@ async def start_cameras_for_user(user_id: str = Form(...)):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         if ip_url:
-            task = asyncio.create_task(capture_and_save(ip_url, folder_path))
+            task = asyncio.create_task(detect(ip_url, folder_path))
             camera_tasks[camera_id] = task
+    print("Start success")
     
-    return {"message": "Cameras started successfully for the user"}
+    return {"message": "Cameras started successfully for all user"}
 
 
 @router.get("/stream")
@@ -56,8 +57,8 @@ async def stream_camera(camera_id:str=Query(None, description="Camera ID") ):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    if int(camera_id) not in list(camera_tasks.keys()):
-        raise HTTPException(status_code=404, detail="Camera not found or not running")
+    # if int(camera_id) not in list(camera_tasks.keys()):
+    #     raise HTTPException(status_code=404, detail="Camera not found or not running")
     
     return StreamingResponse(capture_webcam(ip_url, True), media_type="multipart/x-mixed-replace; boundary=frame")
 # @router.get("/stream/{camera_id}")
@@ -146,3 +147,5 @@ async def get_all_cameras():
     if not cameras:
         raise HTTPException(status_code=404, detail="No cameras found")
     return cameras
+async def startup_event():
+    await start_cameras_for_user()

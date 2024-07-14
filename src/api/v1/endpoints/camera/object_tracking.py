@@ -75,7 +75,7 @@
 #         detections.append([[x1, y1, x2 - x1, y2 - y1], confidence, class_id])
     
 #     tracks = tracker.update_tracks(detections, frame=frame)
-#     return tracks
+#     return tracks, class_id 
 
 # def draw_tracks(frame, tracks, class_names, colors, class_counters, track_class_mapping):
 #     for track in tracks:
