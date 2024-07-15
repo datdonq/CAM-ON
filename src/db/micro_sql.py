@@ -1,14 +1,14 @@
 import pyodbc
 from datetime import datetime
 # Cấu hình kết nối
-server = 'DESKTOP-NPBFOAJ'  # Tên server của bạn
+server = 'HEROX\SQLEXPRESS'  # Tên server của bạn
 database = 'CamOnDB'  # Thay bằng tên database bạn muốn kết nối
 
 # Tạo kết nối sử dụng Windows Authentication
 connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
 conn = pyodbc.connect(connection_string)
 def execute_query(query):
-    server = 'DESKTOP-NPBFOAJ'
+    server = 'HEROX\SQLEXPRESS'
     database = 'CamOnDB'
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
     conn = pyodbc.connect(connection_string)
@@ -18,7 +18,7 @@ def execute_query(query):
     conn.close()
     
 def retrival_query(query: str):
-    server = 'DESKTOP-NPBFOAJ'
+    server = 'HEROX\SQLEXPRESS'
     database = 'CamOnDB'
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
     conn = pyodbc.connect(connection_string)
@@ -29,7 +29,7 @@ def retrival_query(query: str):
     return [row for row in result] if result else []
 
 def retrival_query_user(query: str, params: tuple):
-    server = 'DESKTOP-NPBFOAJ'
+    server = 'HEROX\SQLEXPRESS'
     database = 'CamOnDB'
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
     conn = pyodbc.connect(connection_string)
@@ -40,7 +40,7 @@ def retrival_query_user(query: str, params: tuple):
     return [row for row in result] if result else []
 
 def fetch_query(query: str):
-    server = 'DESKTOP-NPBFOAJ'
+    server = 'HEROX\SQLEXPRESS'
     database = 'CamOnDB'
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
     conn = pyodbc.connect(connection_string)
@@ -53,7 +53,7 @@ def fetch_query(query: str):
     return [dict(zip(columns, row)) for row in result] if result else []
 
 def fetch_query_user(query: str) :
-    server = 'DESKTOP-NPBFOAJ'
+    server = 'HEROX\SQLEXPRESS'
     database = 'CamOnDB'
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
     conn = pyodbc.connect(connection_string)

@@ -13,7 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from src.api.v1.endpoints import router as v1_router
-
+from src.api.v1.endpoints.camera.view_camera import startup_event
 # from src.settings.event import (
 #     create_start_app_handler, create_stop_app_handler,
 # )
@@ -63,7 +63,7 @@ app.add_middleware(
 # app.add_event_handler("startup", create_start_app_handler(app))
 # # run before shutdown server
 # app.add_event_handler("shutdown", create_stop_app_handler(app))
-
+app.add_event_handler("startup", startup_event)
 app.include_router(router=v1_router.router, prefix="")
 
 

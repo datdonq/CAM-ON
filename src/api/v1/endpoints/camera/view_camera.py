@@ -4,13 +4,14 @@ import os
 import asyncio
 
 
-from fastapi import APIRouter, Depends, Form, UploadFile, File, BackgroundTasks,Query
+from fastapi import APIRouter, Depends, UploadFile, File, BackgroundTasks,Query, Form
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from starlette.requests import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from starlette.responses import FileResponse
 from passlib.context import CryptContext 
+from typing import Optional, Dict
 
 from src.db.micro_sql import *
 from src.api.v1.endpoints.camera.camera_function import *
@@ -20,19 +21,47 @@ from src.db.auth import *
 
 router = APIRouter()
 security = HTTPBasic()
+# Dictionary to store active camera tasks
+camera_tasks: Dict[str, asyncio.Task] = {}
+model = initialize_model()
+tracker = DeepSort(max_age=20, n_init=3)
+@router.post("/start_cameras_for_all_user")
+async def start_cameras_for_user():
+    select_query = "SELECT Id, IpAddress FROM Cameras"
+    cameras = fetch_query(select_query)
+    if not cameras:
+        raise HTTPException(status_code=404, detail="No cameras found for the given user ID")
 
+    for camera in cameras:
+        camera_id, ip_url = camera.values()
+        folder_path = os.path.join("./frames", str(camera_id))
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        if ip_url:
+            frame_queue = asyncio.Queue()
+            task = asyncio.create_task(detect(ip_url, model, folder_path, frame_queue))
+            camera_tasks[camera_id] = (task, frame_queue)
+
+    print("Start success")
+    return {"message": "Cameras started successfully for all user"}
 @router.get("/stream")
-async def stream_camera(camera_id:str=Query(None, description="Camera ID") ):
-    query = f"SELECT IpAddress FROM Cameras WHERE Id = {camera_id}"
-    ip_url = retrival_query(query)
-    folder_path = os.path.join("./frames", camera_id)
+async def stream_camera(camera_id: str = Query(None, description="Camera ID")):
+    try:
+        ip_result = retrival_query(f"SELECT IpAddress FROM Cameras WHERE Id = {camera_id}")
+        if not ip_result:
+            raise HTTPException(status_code=404, detail="Camera not found")
 
+        ip_url = ip_result[0][0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    folder_path = os.path.join("./frames", str(camera_id))
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-    if not ip_url:
-        ip_url = 0
-    asyncio.create_task(capture_and_save(ip_url, folder_path))
-    return StreamingResponse(capture_webcam(ip_url,True), media_type="multipart/x-mixed-replace; boundary=frame")
+
+    task, frame_queue = camera_tasks[int(camera_id)]
+    return StreamingResponse(capture_webcam(model,tracker,frame_queue), media_type="multipart/x-mixed-replace; boundary=frame")
+
 
 @router.post("/add_camera")
 async def add_new_camera(camera_url:str=Form(...),
@@ -107,3 +136,5 @@ async def get_all_cameras():
     if not cameras:
         raise HTTPException(status_code=404, detail="No cameras found")
     return cameras
+async def startup_event():
+    await start_cameras_for_user()
