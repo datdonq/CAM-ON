@@ -78,9 +78,11 @@ async def detect(ip_camera_url, model,tracker, folder_path, frame_queue):
         frame = draw_tracks(frame, tracks, class_names, colors, class_counters, track_class_mapping)
         if frame_count == 10:
             frame_count = 0
-
-        await frame_queue.put(frame)
-        await asyncio.sleep(0.1)
+        try:
+            await frame_queue.put(frame)
+            await asyncio.sleep(0.1)
+        except asyncio.CancelledError:
+            pass
 
     cap.release()
     await frame_queue.put(None)  # Signal that detection is done

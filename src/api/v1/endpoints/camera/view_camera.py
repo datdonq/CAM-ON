@@ -38,7 +38,7 @@ async def start_cameras_for_user():
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         if ip_url:
-            frame_queue = asyncio.Queue(maxsize=100)
+            frame_queue = asyncio.Queue()
             task = asyncio.create_task(detect(ip_url, model,tracker, folder_path, frame_queue))
             camera_tasks[camera_id] = (task, frame_queue)
 
