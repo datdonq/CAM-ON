@@ -47,16 +47,9 @@ from src.api.v1.endpoints.camera.object_tracking import *
             
 #             yield (b'--frame\r\n'
 #                     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-async def capture_webcam(model, tracker,frame_queue):
-    class_names = load_class_names()
-    np.random.seed(42)
-    colors = np.random.randint(0, 255, size=(len(class_names), 3))
-    class_counters = defaultdict(int)
-    track_class_mapping = {}
+async def capture_webcam(frame_queue):
     while True:
         frame = await frame_queue.get()
-        tracks = process_frame(frame, model, tracker, class_names, colors)
-        frame = draw_tracks(frame, tracks, class_names, colors, class_counters, track_class_mapping)
         if frame is None:
             break
 
@@ -64,43 +57,30 @@ async def capture_webcam(model, tracker,frame_queue):
         frame_bytes = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-async def detect(ip_camera_url, model, folder_path, frame_queue):
+async def detect(ip_camera_url, model,tracker, folder_path, frame_queue):
     cap = initialize_video_capture(ip_camera_url)
     class_names = load_class_names()
     colors = np.random.randint(0, 255, size=(len(class_names), 3))
     frame_count = 0
-
+    class_counters = defaultdict(int)
+    track_class_mapping = {}
     while True:
         ret, frame = cap.read()
         if not ret:
             break
+        tracks = process_frame(frame, model, tracker, class_names, colors)
+        
+        frame_name = f"frame_{frame_count}.jpg"
+        frame_path = os.path.join(folder_path, frame_name)
+        cv2.imwrite(frame_path, frame)
+        print(f"Saved frame {frame_count}")
+        frame_count += 1
+        frame = draw_tracks(frame, tracks, class_names, colors, class_counters, track_class_mapping)
+        if frame_count == 10:
+            frame_count = 0
 
-        results = model(frame, verbose=False)[0]
-        for det in results.boxes:
-            label, confidence, bbox = det.cls, det.conf, det.xyxy[0]
-            class_id = int(label)
-
-            if class_id is None:
-                if confidence < conf:
-                    continue
-            else:
-                if class_id != class_id or confidence < conf:
-                    continue
-
-        if len(results.boxes) > 0:
-            if class_id == 0:
-                
-                frame_name = f"frame_{frame_count}.jpg"
-                frame_path = os.path.join(folder_path, frame_name)
-                cv2.imwrite(frame_path, frame)
-                print(f"Saved frame {frame_count}")
-                frame_count += 1
-
-                if frame_count == 10:
-                    frame_count = 0
-
-                await frame_queue.put(frame)
-                await asyncio.sleep(0.1)
+        await frame_queue.put(frame)
+        await asyncio.sleep(0.1)
 
     cap.release()
     await frame_queue.put(None)  # Signal that detection is done

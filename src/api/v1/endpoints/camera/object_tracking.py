@@ -60,7 +60,6 @@ def load_class_names():
 def process_frame(frame, model, tracker, class_names, colors):
     results = model(frame, verbose=False)[0]
     detections = []
-    
     for det in results.boxes:
         label, confidence, bbox = det.cls, det.conf, det.xyxy[0]
         x1, y1, x2, y2 = map(int, bbox)
