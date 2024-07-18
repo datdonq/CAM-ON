@@ -38,9 +38,9 @@ async def start_cameras_for_user():
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         if ip_url:
-            frame_queue = asyncio.Queue()
-            task = asyncio.create_task(detect(ip_url, model,tracker, folder_path, frame_queue))
-            camera_tasks[camera_id] = (task, frame_queue)
+            task = asyncio.create_task(capture_and_save(ip_url,folder_path))
+            print(f"Start camera {camera_id}")
+            camera_tasks[ip_url] = task
 
     print("Start success")
     return {"message": "Cameras started successfully for all user"}
@@ -58,9 +58,9 @@ async def stream_camera(camera_id: str = Query(None, description="Camera ID")):
     folder_path = os.path.join("./frames", str(camera_id))
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
+    task = camera_tasks[ip_url]
 
-    task, frame_queue = camera_tasks[int(camera_id)]
-    return StreamingResponse(capture_webcam(frame_queue), media_type="multipart/x-mixed-replace; boundary=frame")
+    return StreamingResponse(capture_webcam(ip_url,model,tracker,folder_path), media_type="multipart/x-mixed-replace; boundary=frame")
 
 
 @router.post("/add_camera")
